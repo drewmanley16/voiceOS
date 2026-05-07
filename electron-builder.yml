@@ -1,0 +1,21 @@
+appId: com.aura.desktop
+productName: Aura
+directories:
+  output: out
+
+mac:
+  category: public.app-category.productivity
+  target: dmg
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  extendInfo:
+    NSMicrophoneUsageDescription: "Aura needs microphone access for voice commands"
+    NSAppleEventsUsageDescription: "Aura needs automation access to control your Mac"
+
+files:
+  - dist/**/*
+  - dist-electron/**/*
+  - "!node_modules/**/*"
+
+extraMetadata:
+  main: dist-electron/main.js
