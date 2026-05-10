@@ -1,18 +1,21 @@
 import { runAppleScriptMultiline } from './applescript';
 
 export async function sendEmail(to: string, subject: string, body: string): Promise<string> {
+  const escapedSubject = subject.replace(/"/g, '\\"');
+  const escapedBody = body.replace(/"/g, '\\"');
+
   const script = `
 tell application "Mail"
-  set newMessage to make new outgoing message with properties {subject:"${subject.replace(/"/g, '\\"')}", content:"${body.replace(/"/g, '\\"')}"}
+  set newMessage to make new outgoing message with properties {subject:"${escapedSubject}", content:"${escapedBody}", visible:true}
   tell newMessage
     make new to recipient with properties {address:"${to}"}
   end tell
-  send newMessage
+  activate
 end tell`;
   try {
     await runAppleScriptMultiline(script);
-    return `Email sent to ${to} with subject "${subject}"`;
+    return `Email draft created to ${to} with subject "${subject}" — opened in Mail for review before sending`;
   } catch {
-    return 'Could not send email. Please make sure Mail.app is configured.';
+    return 'Could not create email. Please make sure Mail.app is configured.';
   }
 }

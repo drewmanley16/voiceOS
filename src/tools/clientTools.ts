@@ -4,13 +4,25 @@ function dispatchAction(action: string) {
   );
 }
 
-const exec = async (command: string, params: Record<string, unknown>): Promise<string> => {
-  dispatchAction(command.replace(/_/g, ' '));
+function dispatchResult(action: string, result: string) {
+  window.dispatchEvent(
+    new CustomEvent('aura-action-result', { detail: { action, result } })
+  );
+}
 
+const exec = async (command: string, params: Record<string, unknown>): Promise<string> => {
+  const actionName = command.replace(/_/g, ' ');
+  dispatchAction(actionName);
+
+  let result: string;
   if (window.electronAPI) {
-    return window.electronAPI.executeCommand(command, params);
+    result = await window.electronAPI.executeCommand(command, params);
+  } else {
+    result = `[dev mode] Would execute: ${command} with ${JSON.stringify(params)}`;
   }
-  return `[dev mode] Would execute: ${command} with ${JSON.stringify(params)}`;
+
+  dispatchResult(actionName, result.slice(0, 80));
+  return result;
 };
 
 export const clientTools = {
@@ -64,5 +76,21 @@ export const clientTools = {
 
   set_timer: async (params: { minutes: number; label: string }) => {
     return exec('set_timer', params);
+  },
+
+  get_notifications: async () => {
+    return exec('get_notifications', {});
+  },
+
+  send_notification: async (params: { title: string; message: string }) => {
+    return exec('send_notification', params);
+  },
+
+  capture_screen: async () => {
+    return exec('capture_screen', {});
+  },
+
+  get_active_window: async () => {
+    return exec('get_active_window', {});
   },
 };

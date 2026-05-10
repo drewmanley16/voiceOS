@@ -10,28 +10,28 @@ interface Message {
 }
 
 export function Transcription() {
-  const { message } = useConversation();
+  const conversation = useConversation();
   const [messages, setMessages] = useState<Message[]>([]);
   const idRef = useRef(0);
 
   useEffect(() => {
-    if (!message) return;
+    if (!conversation.message) return;
 
     const newMsg: Message = {
       id: idRef.current++,
-      text: message,
-      source: 'agent',
+      text: conversation.message,
+      source: conversation.isSpeaking ? 'agent' : 'user',
       timestamp: Date.now(),
     };
 
-    setMessages((prev) => [...prev.slice(-2), newMsg]);
+    setMessages((prev) => [...prev.slice(-3), newMsg]);
 
     const timer = setTimeout(() => {
       setMessages((prev) => prev.filter((m) => m.id !== newMsg.id));
-    }, 8000);
+    }, 10000);
 
     return () => clearTimeout(timer);
-  }, [message]);
+  }, [conversation.message]);
 
   return (
     <div className="flex flex-col items-center gap-1.5 max-w-[260px] no-drag">
@@ -46,9 +46,25 @@ export function Transcription() {
             transition={{ duration: 0.25, ease: 'easeOut' }}
             className="w-full"
           >
-            <p className="text-[11px] text-white/80 bg-black/40 backdrop-blur-md rounded-xl px-3 py-2 leading-relaxed text-center">
-              {msg.text}
-            </p>
+            <div className={`flex items-start gap-1.5 ${msg.source === 'user' ? 'justify-end' : 'justify-start'}`}>
+              {msg.source === 'agent' && (
+                <div className="w-4 h-4 rounded-full bg-gradient-to-br from-violet-400 to-purple-600 flex-shrink-0 mt-0.5 flex items-center justify-center">
+                  <div className="w-1.5 h-1.5 rounded-full bg-white/60" />
+                </div>
+              )}
+              <p className={`text-[11px] backdrop-blur-md rounded-xl px-3 py-2 leading-relaxed ${
+                msg.source === 'user'
+                  ? 'bg-white/15 text-white/70 text-right'
+                  : 'bg-black/40 text-white/90 text-left'
+              }`}>
+                {msg.text}
+              </p>
+              {msg.source === 'user' && (
+                <div className="w-4 h-4 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex-shrink-0 mt-0.5 flex items-center justify-center">
+                  <div className="w-1.5 h-1.5 rounded-full bg-white/60" />
+                </div>
+              )}
+            </div>
           </motion.div>
         ))}
       </AnimatePresence>

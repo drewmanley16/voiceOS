@@ -8,6 +8,8 @@ import { openUrl, webSearch } from './browser';
 import { createNote } from './notes';
 import { getWeather } from './weather';
 import { setTimer } from './timer';
+import { getRecentNotifications, sendNotification } from './notifications';
+import { captureScreenForContext, getActiveWindowInfo } from './screen';
 
 export async function handleCommand(command: string, params: Record<string, unknown>): Promise<string> {
   switch (command) {
@@ -45,6 +47,14 @@ export async function handleCommand(command: string, params: Record<string, unkn
       return getWeather(params.location as string);
     case 'set_timer':
       return setTimer(params.minutes as number, params.label as string);
+    case 'get_notifications':
+      return getRecentNotifications();
+    case 'send_notification':
+      return sendNotification(params.title as string, params.message as string);
+    case 'capture_screen':
+      return captureScreenForContext();
+    case 'get_active_window':
+      return getActiveWindowInfo();
     default:
       return `Unknown command: ${command}`;
   }
